@@ -24,15 +24,13 @@
         
         mouseStatus: {},
         
-        FENPos: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR",
+        FENPos: "rnbqkbnr/ppp1pppp/3p4/8/4P3/8/PPPP1PPP/RNBQKBNR",
         
-        matrix: (function () {
+        matrix: (function () { //TODO: Matrix to fen!
+          //administration of position vi FEN String
           var m = [];
           for(i = 0; i < 8; i++) {
-            m[i] = [];
-            for(j = 0; j < 8; j++) {
-              m[i][j] = '';
-            }
+            m[i] = ['','','','','','','',''];
           }
           return m;
         }()),
@@ -44,8 +42,9 @@
             var pieces = row.split('');
             pieces.forEach(function (p, idx) {
               if (p.match(/\d/)) {
-                var toX = x+p;
+                var toX = x+parseInt(p);
                 while(x < toX) {
+                  console.log(x, toX);
                   chessBoard.matrix[y][x] = '';
                   chessBoard.rawDraw(x++, y, 1, 1);
                 }
@@ -57,6 +56,7 @@
                 x++;
               } else {
                 console.log("INVALID CHAR: "+p);
+                x++;
               }
             });
           });
@@ -64,12 +64,17 @@
         },
         
         init: function () {
-          
           this.canvas = document.querySelector('#canvas');
           this.context = canvas.getContext('2d');
           this.context.scale(40, 40);
           var k = 0;
           this.FENPosToMatrix();
+          this.drawLabels();
+          
+          this.addEvents();
+        },
+        
+        addEvents: function () {
           this.canvas.addEventListener('mousedown', function (e) {
             e.stopPropagation();
             var xPos = e.clientX - parseInt(chessBoard.canvas.style.left);
@@ -100,7 +105,7 @@
             chessBoard.mouseStatus = {};
           });
         },
-
+        
         draw: function(col, row, w, h, img) {
           context.fillRect(indexForColLetter(col), indexForRowNumber(row), 1, 1);
           if(img) {
@@ -132,8 +137,29 @@
           return 8 - idx;
         },
 
-        drawTest: function () {
-          context.drawImage(img, 40, 40, 40, 40);
+        drawLabels: function () {
+          console.log(this.canvas);
+          this.context = this.canvas.getContext('2d');
+          console.log(this.context);
+          this.context.scale(0.025, 0.025);
+          this.context.fillStyle = 'red';
+          this.context.font = '32px serif';
+          this.context.fillText('a', 9, 345);
+          this.context.fillText('b', 49, 345);
+          this.context.fillText('c', 89, 345);
+          this.context.fillText('d', 129, 345);
+          this.context.fillText('e', 169, 345);
+          this.context.fillText('f', 209, 345);
+          this.context.fillText('g', 249, 345);
+          this.context.fillText('h', 289, 345);
+          this.context.fillText('1', 329, 32);
+          this.context.fillText('2', 329, 72);
+          this.context.fillText('3', 329, 112);
+          this.context.fillText('4', 329, 152);
+          this.context.fillText('5', 329, 192);
+          this.context.fillText('6', 329, 232);
+          this.context.fillText('7', 329, 272);
+          this.context.fillText('8', 329, 312);
         },
         getRawSquareForCoordinates: function (left, top) {
           return [Math.floor(left / 40), Math.floor(top / 40)];
@@ -158,6 +184,5 @@
   </head>
   <body onload="chessBoard.init()">
     <canvas id="canvas" width="360" height="360" style="position:absolute; left:20px; top:20px;"></canvas>
-    <a href="javascript:chessBoard.drawTest()">drawtest</a>
   </body>
 </html>
