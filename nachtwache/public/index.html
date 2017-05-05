@@ -11,7 +11,7 @@
                   'wB', 'wK', 'wN', 'wP', 'wQ', 'wR'],
 
         imgObjs: [],
-
+        
         init: function () {
           this.canvas = document.querySelector('#canvas');
           this.context = canvas.getContext('2d');
@@ -27,6 +27,15 @@
               }
             }
           }
+          this.canvas.addEventListener('mousedown', function (e) {
+            console.log('V => ' + (e.clientX - parseInt(chessBoard.canvas.style.left)) + '#' +
+                  (e.clientY - parseInt(chessBoard.canvas.style.top)));
+          });
+          this.canvas.addEventListener('mouseup', function (e) {
+            console.log('A => ' + (e.clientX - parseInt(chessBoard.canvas.style.left)) + '#' +
+                  (e.clientY - parseInt(chessBoard.canvas.style.top)));
+          });
+          
         },
 
         draw: function(col, row, w, h, img) {
@@ -37,11 +46,9 @@
         },
 
         rawDraw: function (x, y, w, h, img) {
-          console.log(x + y);
           this.context.fillStyle = (x + y) % 2 ? 'yellow' : 'blue';
           this.context.fillRect(x, y, w, h);
           if(img) {
-            //console.log(img, x, y, w, h);
             this.context.drawImage(img, x, y, w, h);
           }
         },
@@ -55,8 +62,7 @@
         },
 
         colLetterForIndex: function (idx) {
-          var rowLetterAry = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
-          return rowLetterAry[idx];
+          return 'abcdefgh'.split()[idx];
         },
 
         rowNumberForIndex: function (idx) {
@@ -76,7 +82,7 @@
     </script>
   </head>
   <body onload="chessBoard.init()">
-    <canvas id="canvas" width="360" height="360"></canvas>
+    <canvas id="canvas" width="360" height="360" style="position:absolute; left:20px; top:20px;"></canvas>
     <a href="javascript:chessBoard.drawTest()">drawtest</a>
   </body>
 </html>
