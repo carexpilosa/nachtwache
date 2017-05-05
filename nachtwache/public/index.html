@@ -6,78 +6,77 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="js/jquery-3.2.1.js" type="text/javascript"></script>
     <script type="text/javascript">
-      var canvas,
-          context,
-          imgSrcs = ['bB', 'bK', 'bN', 'bP', 'bQ', 'bR',
-                     'wB', 'wK', 'wN', 'wP', 'wQ', 'wR'],
-          imgObjs = [];
-          
-          imgSrcs.forEach(function(val, idx) {
-            let pic = new Image();
-            pic.src = './img/' + val + '.png';
-            imgObjs.push(pic);
-          });
-      
-      function init() {
-        canvas = document.querySelector('#canvas');
-        context = canvas.getContext('2d');
-        context.scale(40, 40);
-        var k = 0;
-        for (var i = 0; i < 8; i++) {
-          for (var j = 0; j < 8; j++) {
-            let pic = imgObjs[k];
-            rawDraw(j, i, 1, 1, pic);
-            k++;
-            if(k > imgObjs.length - 1) {
-              k = 0;
+      var chessBoard = {
+        imgSrcs: ['bB', 'bK', 'bN', 'bP', 'bQ', 'bR',
+                  'wB', 'wK', 'wN', 'wP', 'wQ', 'wR'],
+
+        imgObjs: [],
+
+        init: function () {
+          this.canvas = document.querySelector('#canvas');
+          this.context = canvas.getContext('2d');
+          this.context.scale(40, 40);
+          var k = 0;
+          for (var i = 0; i < 8; i++) {
+            for (var j = 0; j < 8; j++) {
+              let pic = this.imgObjs[k];
+              this.rawDraw(j, i, 1, 1, pic);
+              k++;
+              if(k > this.imgObjs.length - 1) {
+                k = 0;
+              }
             }
           }
+        },
+
+        draw: function(col, row, w, h, img) {
+          context.fillRect(indexForColLetter(col), indexForRowNumber(row), 1, 1);
+          if(img) {
+            this.context.drawImage(img, col, row, w, h);
+          }
+        },
+
+        rawDraw: function (x, y, w, h, img) {
+          console.log(x + y);
+          this.context.fillStyle = (x + y) % 2 ? 'yellow' : 'blue';
+          this.context.fillRect(x, y, w, h);
+          if(img) {
+            //console.log(img, x, y, w, h);
+            this.context.drawImage(img, x, y, w, h);
+          }
+        },
+
+        indexForColLetter: function (colLetter) {
+          return 'abcdefgh'.indexOf(colLetter.toLowerCase());
+        },
+
+        indexForRowNumber: function (rowNumber) {
+          return 8 - rowNumber - 1;
+        },
+
+        colLetterForIndex: function (idx) {
+          var rowLetterAry = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
+          return rowLetterAry[idx];
+        },
+
+        rowNumberForIndex: function (idx) {
+          return idx + 1;
+        },
+
+        drawTest: function () {
+          context.drawImage(img, 40, 40, 40, 40);
         }
-        
-      }
+      };
       
-      function draw(col, row, w, h, img) {
-        console.log(img);
-        context.fillRect(indexForColLetter(col), indexForRowNumber(row), 1, 1);
-        if(img) {
-          context.drawImage(img, col, row, w, h);
-        }
-      }
-      
-      function rawDraw(x, y, w, h, img) {
-        console.log(x + y);
-        context.fillStyle = (x + y) % 2 ? 'yellow' : 'blue';
-        context.fillRect(x, y, w, h);
-        if(img) {
-          //console.log(img, x, y, w, h);
-          context.drawImage(img, x, y, w, h);
-        }
-      }
-      
-      function indexForColLetter(colLetter) {
-        return 'abcdefgh'.indexOf(colLetter.toLowerCase());
-      }
-      
-      function indexForRowNumber(rowNumber) {
-        return 8 - rowNumber - 1;
-      }
-      
-      function colLetterForIndex(idx) {
-        var rowLetterAry = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
-        return rowLetterAry[idx];
-      }
-      
-      function rowNumberForIndex(idx) {
-        return idx + 1;
-      }
-      
-      function drawTest() {
-        context.drawImage(img, 40, 40, 40, 40);
-      }
+      chessBoard.imgSrcs.forEach(function(val, idx) {
+        let pic = new Image();
+        pic.src = './img/' + val + '.png';
+        chessBoard.imgObjs.push(pic);
+      });
     </script>
   </head>
-  <body onload="init()">
+  <body onload="chessBoard.init()">
     <canvas id="canvas" width="360" height="360"></canvas>
-    <a href="javascript:drawTest()">drawtest</a>
+    <a href="javascript:chessBoard.drawTest()">drawtest</a>
   </body>
 </html>
