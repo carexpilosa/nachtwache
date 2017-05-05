@@ -28,14 +28,22 @@
             }
           }
           this.canvas.addEventListener('mousedown', function (e) {
-            console.log('V => ' + (e.clientX - parseInt(chessBoard.canvas.style.left)) + '#' +
-                  (e.clientY - parseInt(chessBoard.canvas.style.top)));
+            var xPos = e.clientX - parseInt(chessBoard.canvas.style.left);
+            var yPos = e.clientY - parseInt(chessBoard.canvas.style.top);
+            console.log('V => ' + xPos + '#' + yPos);
+            console.log(chessBoard.getSquareForCoordinates(xPos, yPos));
           });
           this.canvas.addEventListener('mouseup', function (e) {
-            console.log('A => ' + (e.clientX - parseInt(chessBoard.canvas.style.left)) + '#' +
+            e.stopPropagation();
+            var xPos = e.clientX - parseInt(chessBoard.canvas.style.left);
+            var yPos = e.clientY - parseInt(chessBoard.canvas.style.top);
+            console.log('A => ' + xPos + '#' + yPos);
+            console.log(chessBoard.getSquareForCoordinates(xPos, yPos));
+          });
+          document.addEventListener('mouseup', function (e) {
+            console.log('A OUT => ' + (e.clientX - parseInt(chessBoard.canvas.style.left)) + '#' +
                   (e.clientY - parseInt(chessBoard.canvas.style.top)));
           });
-          
         },
 
         draw: function(col, row, w, h, img) {
@@ -62,15 +70,24 @@
         },
 
         colLetterForIndex: function (idx) {
-          return 'abcdefgh'.split()[idx];
+          return 'abcdefgh'.split('')[idx];
         },
 
         rowNumberForIndex: function (idx) {
-          return idx + 1;
+          return 8 - idx;
         },
 
         drawTest: function () {
           context.drawImage(img, 40, 40, 40, 40);
+        },
+        getRawSquareForCoordinates: function (left, top) {
+          return [Math.floor(left / 40), Math.floor(top / 40)];
+        },
+        getSquareForCoordinates: function (left, top) {
+          var xyArray = chessBoard.getRawSquareForCoordinates(left, top);
+          console.log(xyArray);
+          return [chessBoard.colLetterForIndex(xyArray[0]),
+                  chessBoard.rowNumberForIndex(xyArray[1])];
         }
       };
       
