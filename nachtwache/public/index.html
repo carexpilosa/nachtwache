@@ -6,24 +6,38 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="js/jquery-3.2.1.js" type="text/javascript"></script>
     <script type="text/javascript">
-      var canvas, context;
+      var canvas,
+          context,
+          imgSrcs = ['bB', 'bK', 'bN', 'bP', 'bQ', 'bR',
+                     'wB', 'wK', 'wN', 'wP', 'wQ', 'wR'],
+          imgObjs = [];
+          
+          imgSrcs.forEach(function(val, idx) {
+            let pic = new Image();
+            pic.src = './img/' + val + '.png';
+            imgObjs.push(pic);
+          });
+      
       function init() {
         canvas = document.querySelector('#canvas');
         context = canvas.getContext('2d');
-        context.scale(40, 40);
         console.log(canvas);
-        context.fillStyle = 'red';
-        
-        var image = new Image();
-        image.src = './img/bB.png';
-        
+        //context.fillStyle = 'red';
+        var k = 0;
         for (var i = 0; i < 8; i++) {
           for (var j = 0; j < 8; j++) {
-            if ((i + j) % 2) {
-              rawDraw(i, j, 1, 1);
-            }
+            //if ((i + j) % 2) {
+              let pic = imgObjs[k];
+              console.log(pic.src);
+              context.drawImage(pic, 40 * j, 40 * i, 40, 40);
+              k++;
+              if(k > imgObjs.length - 1) {
+                k = 0;
+              }
+            //}
           }
         }
+        
       }
       
       function draw(col, row, w, h, img) {
@@ -61,9 +75,14 @@
       function rowNumberForIndex(idx) {
         return idx + 1;
       }
+      
+      function drawTest() {
+        context.drawImage(img, 40, 40, 40, 40);
+      }
     </script>
   </head>
   <body onload="init()">
     <canvas id="canvas" width="360" height="360"></canvas>
+    <a href="javascript:drawTest()">drawtest</a>
   </body>
 </html>
