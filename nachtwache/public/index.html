@@ -114,7 +114,7 @@
         },
 
         rawDraw: function (x, y, w, h, img) {
-          this.context.fillStyle = (x + y) % 2 ? 'yellow' : 'blue';
+          this.context.fillStyle = (x + y) % 2 ? 'lightblue' : 'lightgray';
           this.context.fillRect(x, y, w, h);
           if(img) {
             this.context.drawImage(img, x, y, w, h);
@@ -142,7 +142,7 @@
           this.context = this.canvas.getContext('2d');
           console.log(this.context);
           this.context.scale(0.025, 0.025);
-          this.context.fillStyle = 'red';
+          this.context.fillStyle = 'black';
           this.context.font = '32px serif';
           this.context.fillText('a', 9, 345);
           this.context.fillText('b', 49, 345);
@@ -160,6 +160,7 @@
           this.context.fillText('6', 329, 232);
           this.context.fillText('7', 329, 272);
           this.context.fillText('8', 329, 312);
+          this.context.scale(40, 40);
         },
         getRawSquareForCoordinates: function (left, top) {
           return [Math.floor(left / 40), Math.floor(top / 40)];
