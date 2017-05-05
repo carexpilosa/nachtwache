@@ -21,20 +21,16 @@
       function init() {
         canvas = document.querySelector('#canvas');
         context = canvas.getContext('2d');
-        console.log(canvas);
-        //context.fillStyle = 'red';
+        context.scale(40, 40);
         var k = 0;
         for (var i = 0; i < 8; i++) {
           for (var j = 0; j < 8; j++) {
-            //if ((i + j) % 2) {
-              let pic = imgObjs[k];
-              console.log(pic.src);
-              context.drawImage(pic, 40 * j, 40 * i, 40, 40);
-              k++;
-              if(k > imgObjs.length - 1) {
-                k = 0;
-              }
-            //}
+            let pic = imgObjs[k];
+            rawDraw(j, i, 1, 1, pic);
+            k++;
+            if(k > imgObjs.length - 1) {
+              k = 0;
+            }
           }
         }
         
@@ -43,20 +39,19 @@
       function draw(col, row, w, h, img) {
         console.log(img);
         context.fillRect(indexForColLetter(col), indexForRowNumber(row), 1, 1);
-        //if(img) {
-        //  console.log(img, col, row, w, h);
-        //  context.drawImage(img, col, row, w, h);
-        //}
-        
+        if(img) {
+          context.drawImage(img, col, row, w, h);
+        }
       }
       
       function rawDraw(x, y, w, h, img) {
-        console.log(img);
+        console.log(x + y);
+        context.fillStyle = (x + y) % 2 ? 'yellow' : 'blue';
         context.fillRect(x, y, w, h);
-        //if(img) {
-        //  console.log(img, x, y, w, h);
-        //  context.drawImage(img, x, y, w, h);
-        //}
+        if(img) {
+          //console.log(img, x, y, w, h);
+          context.drawImage(img, x, y, w, h);
+        }
       }
       
       function indexForColLetter(colLetter) {
