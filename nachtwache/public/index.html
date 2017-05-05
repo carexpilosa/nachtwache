@@ -7,42 +7,97 @@
     <script src="js/jquery-3.2.1.js" type="text/javascript"></script>
     <script type="text/javascript">
       var chessBoard = {
-        imgSrcs: ['bB', 'bK', 'bN', 'bP', 'bQ', 'bR',
-                  'wB', 'wK', 'wN', 'wP', 'wQ', 'wR'],
+        imgSrcs: {r: './img/bR.png',
+                  n: './img/bN.png',
+                  b: './img/bB.png',
+                  q: './img/bQ.png',
+                  k: './img/bK.png',
+                  p: './img/bP.png',
+                  R: './img/wR.png',
+                  N: './img/wN.png',
+                  B: './img/wB.png',
+                  Q: './img/wQ.png',
+                  K: './img/wK.png',
+                  P: './img/wP.png'},
 
-        imgObjs: [],
+        imgObjs: {},
+        
+        mouseStatus: {},
+        
+        FENPos: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR",
+        
+        matrix: (function () {
+          var m = [];
+          for(i = 0; i < 8; i++) {
+            m[i] = [];
+            for(j = 0; j < 8; j++) {
+              m[i][j] = '';
+            }
+          }
+          return m;
+        }()),
+        
+        FENPosToMatrix: function () {
+          var rows = this.FENPos.split('/');
+          rows.forEach(function (row, y) {
+            var x = 0;
+            var pieces = row.split('');
+            pieces.forEach(function (p, idx) {
+              if (p.match(/\d/)) {
+                var toX = x+p;
+                while(x < toX) {
+                  chessBoard.matrix[y][x] = '';
+                  chessBoard.rawDraw(x++, y, 1, 1);
+                }
+                console.log("NUMER: "+p);
+              } else if (p.match(/[rnbqkpRNBQKP]/)) {
+                chessBoard.rawDraw(x, y, 1, 1, chessBoard.imgObjs[p]);
+                console.log("VALID LETTER: "+p);
+                chessBoard.matrix[y][x] = p;
+                x++;
+              } else {
+                console.log("INVALID CHAR: "+p);
+              }
+            });
+          });
+          console.table(this.matrix);
+        },
         
         init: function () {
+          
           this.canvas = document.querySelector('#canvas');
           this.context = canvas.getContext('2d');
           this.context.scale(40, 40);
           var k = 0;
-          for (var i = 0; i < 8; i++) {
-            for (var j = 0; j < 8; j++) {
-              let pic = this.imgObjs[k];
-              this.rawDraw(j, i, 1, 1, pic);
-              k++;
-              if(k > this.imgObjs.length - 1) {
-                k = 0;
-              }
-            }
-          }
+          this.FENPosToMatrix();
           this.canvas.addEventListener('mousedown', function (e) {
-            var xPos = e.clientX - parseInt(chessBoard.canvas.style.left);
-            var yPos = e.clientY - parseInt(chessBoard.canvas.style.top);
-            console.log('V => ' + xPos + '#' + yPos);
-            console.log(chessBoard.getSquareForCoordinates(xPos, yPos));
-          });
-          this.canvas.addEventListener('mouseup', function (e) {
             e.stopPropagation();
             var xPos = e.clientX - parseInt(chessBoard.canvas.style.left);
             var yPos = e.clientY - parseInt(chessBoard.canvas.style.top);
-            console.log('A => ' + xPos + '#' + yPos);
-            console.log(chessBoard.getSquareForCoordinates(xPos, yPos));
+            var coords = chessBoard.getSquareForCoordinates(xPos, yPos);
+            chessBoard.mouseStatus = { hold: 1, x: coords[0], y: coords[1] };
+            console.log(chessBoard.mouseStatus);
+          });
+          this.canvas.addEventListener('mouseup', function (e) {
+            //e.stopPropagation();
+            var xPos = e.clientX - parseInt(chessBoard.canvas.style.left);
+            var yPos = e.clientY - parseInt(chessBoard.canvas.style.top);
+            var coords = chessBoard.getSquareForCoordinates(xPos, yPos);
+            var prevMouseStatus = chessBoard.mouseStatus;
+            chessBoard.mouseStatus = { released: 'inside', x: coords[0], y: coords[1] };
+            console.log('moved from '+prevMouseStatus.x+prevMouseStatus.y+
+                        ' to '+chessBoard.mouseStatus.x+chessBoard.mouseStatus.y);
+            chessBoard.mouseStatus = {};
           });
           document.addEventListener('mouseup', function (e) {
-            console.log('A OUT => ' + (e.clientX - parseInt(chessBoard.canvas.style.left)) + '#' +
-                  (e.clientY - parseInt(chessBoard.canvas.style.top)));
+            var xPos = e.clientX - parseInt(chessBoard.canvas.style.left);
+            var yPos = e.clientY - parseInt(chessBoard.canvas.style.top);
+            var coords = chessBoard.getSquareForCoordinates(xPos, yPos);
+            var prevMouseStatus = chessBoard.mouseStatus;
+            chessBoard.mouseStatus = { released: 'outside', x: coords[0], y: coords[1] };
+            console.log('moved from '+prevMouseStatus.x+prevMouseStatus.y+
+                        ' to OUTSIDE');
+            chessBoard.mouseStatus = {};
           });
         },
 
@@ -91,11 +146,14 @@
         }
       };
       
-      chessBoard.imgSrcs.forEach(function(val, idx) {
+      for (key in chessBoard.imgSrcs) {
+        console.log(key);
         let pic = new Image();
-        pic.src = './img/' + val + '.png';
-        chessBoard.imgObjs.push(pic);
-      });
+        pic.src = chessBoard.imgSrcs[key];
+        chessBoard.imgObjs[key] = pic;
+      }
+      console.log(chessBoard.imgObjs);
+      console.table(chessBoard.matrix);
     </script>
   </head>
   <body onload="chessBoard.init()">
