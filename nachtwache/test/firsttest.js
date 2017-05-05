@@ -1,7 +1,7 @@
 module.exports = {
   'Demo test firsttest' : function (browser) {
     browser
-      .url('http://localhost:8383/nachtwache/index.html')
+      .url('http://localhost:8383/nachtwache/first.html')
       .waitForElementVisible('body', 1000)
       .waitForElementVisible('input[name=testInput]', 1000)
       .clearValue('input[name=testInput]')
