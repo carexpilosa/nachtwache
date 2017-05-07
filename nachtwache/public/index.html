@@ -9,8 +9,8 @@
         position:   absolute;
         left:       0px;
         top:        0px;
-        width: 40px;
-        height: 40px;
+        width:      40px;
+        height:     40px;
       }
       
     </style>
@@ -74,8 +74,8 @@
           var k = 0;
           this.FENPosToMatrix();
           this.drawLabels();
-          
           this.addEvents();
+          $('#FENPos').val(this.FENPos);
         },
         
         getCoords: function (e) {
@@ -120,7 +120,7 @@
           document.addEventListener('mouseup', function (e) {
             var [x, y] = cB.getXY(e);
             var img = cB.imgObjs[cB.mouseStatus.imgKey];
-            if(x -1 && x < 8 && y > -1 && y < 8) {
+            if(x > -1 && x < 8 && y > -1 && y < 8) {
               cB.rawDraw(x, y, 1, 1, cB.mouseStatus.imgKey);
             } else {
               cB.rawDraw(cB.mouseStatus.x, cB.mouseStatus.y, 1, 1, cB.mouseStatus.imgKey);
@@ -188,22 +188,6 @@
           '12345678'.split('').forEach(function (val, idx) {
             ctx.fillText(val, 329, idx * 40 + 32);
           });
-          /*ctx.fillText('a', 9, 345);
-          ctx.fillText('b', 49, 345);
-          ctx.fillText('c', 89, 345);
-          ctx.fillText('d', 129, 345);
-          ctx.fillText('e', 169, 345);
-          ctx.fillText('f', 209, 345);
-          ctx.fillText('g', 249, 345);
-          ctx.fillText('h', 289, 345);
-          ctx.fillText('1', 329, 32);
-          ctx.fillText('2', 329, 72);
-          ctx.fillText('3', 329, 112);
-          ctx.fillText('4', 329, 152);
-          ctx.fillText('5', 329, 192);
-          ctx.fillText('6', 329, 232);
-          ctx.fillText('7', 329, 272);
-          ctx.fillText('8', 329, 312);*/
           ctx.scale(40, 40);
         },
         getRawSquareForCoordinates: function (left, top) {
@@ -228,5 +212,6 @@
   <body onload="cB.init()">
     <canvas id="canvas" width="360" height="360" style="position:absolute; left:20px; top:20px;"></canvas>
     <div id="mover"></div>
+    <input type="text" id="FENPos">
   </body>
 </html>
