@@ -4,6 +4,16 @@
     <title>Nachtwache Index</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style type="text/css">
+      #mover {
+        position:   absolute;
+        left:       0px;
+        top:        0px;
+        width: 40px;
+        height: 40px;
+      }
+      
+    </style>
     <script src="js/jquery-3.2.1.js" type="text/javascript"></script>
     <script type="text/javascript">
       var chessBoard = {
@@ -44,23 +54,23 @@
               if (p.match(/\d/)) {
                 var toX = x+parseInt(p);
                 while(x < toX) {
-                  console.log(x, toX);
+                  //console.log(x, toX);
                   chessBoard.matrix[y][x] = '';
                   chessBoard.rawDraw(x++, y, 1, 1);
                 }
-                console.log("NUMER: "+p);
+                //console.log("NUMER: "+p);
               } else if (p.match(/[rnbqkpRNBQKP]/)) {
                 chessBoard.rawDraw(x, y, 1, 1, chessBoard.imgObjs[p]);
-                console.log("VALID LETTER: "+p);
+                //console.log("VALID LETTER: "+p);
                 chessBoard.matrix[y][x] = p;
                 x++;
               } else {
-                console.log("INVALID CHAR: "+p);
+                //console.log("INVALID CHAR: "+p);
                 x++;
               }
             });
           });
-          console.table(this.matrix);
+          //console.table(this.matrix);
         },
         
         init: function () {
@@ -74,35 +84,72 @@
           this.addEvents();
         },
         
+        getCoords: function (e) {
+          var xPos = e.clientX - parseInt(chessBoard.canvas.style.left);
+          var yPos = e.clientY - parseInt(chessBoard.canvas.style.top);
+          return chessBoard.getSquareForCoordinates(xPos, yPos);
+        },
+        
+        getXY: function (e) {
+          var xPos = e.clientX - parseInt(chessBoard.canvas.style.left);
+          var yPos = e.clientY - parseInt(chessBoard.canvas.style.top);
+          return chessBoard.getRawSquareForCoordinates(xPos, yPos);
+        },
+        
+        getImgKeyForXY: function (x, y) {
+          return chessBoard.matrix[y][x];
+        },
+        
         addEvents: function () {
           this.canvas.addEventListener('mousedown', function (e) {
             e.stopPropagation();
-            var xPos = e.clientX - parseInt(chessBoard.canvas.style.left);
-            var yPos = e.clientY - parseInt(chessBoard.canvas.style.top);
-            var coords = chessBoard.getSquareForCoordinates(xPos, yPos);
-            chessBoard.mouseStatus = { hold: 1, x: coords[0], y: coords[1] };
-            console.log(chessBoard.mouseStatus);
+            var xy = chessBoard.getXY(e);
+            console.table(chessBoard.matrix);
+            chessBoard.mouseStatus = {mousedown: 1};
+            var moveImgKey = chessBoard.getImgKeyForXY(xy[0], xy[1]);
+            var moveImg = chessBoard.imgObjs[moveImgKey];
+            console.log(xy, moveImg);
+            $('#mover').append(moveImg);
+            
+            $('#mover').css({
+                              'visibility': 'visible',
+                              'left': (e.clientX - 20) + 'px',
+                              'top': (e.clientY - 20) + 'px'
+                            });
+            //$('#mover').css('background-color',
+            //                ((xy[0] + xy[1]) % 2) ? 'lightblue' : 'lightgray');
           });
           this.canvas.addEventListener('mouseup', function (e) {
-            //e.stopPropagation();
-            var xPos = e.clientX - parseInt(chessBoard.canvas.style.left);
-            var yPos = e.clientY - parseInt(chessBoard.canvas.style.top);
-            var coords = chessBoard.getSquareForCoordinates(xPos, yPos);
-            var prevMouseStatus = chessBoard.mouseStatus;
-            chessBoard.mouseStatus = { released: 'inside', x: coords[0], y: coords[1] };
-            console.log('moved from '+prevMouseStatus.x+prevMouseStatus.y+
-                        ' to '+chessBoard.mouseStatus.x+chessBoard.mouseStatus.y);
-            chessBoard.mouseStatus = {};
+            e.stopPropagation();
+            //var coords = chessBoard.getCoords(e);
+            //var prevMouseStatus = chessBoard.mouseStatus;
+            //chessBoard.mouseStatus = { released: 'inside', x: coords[0], y: coords[1] };
+            //console.log('moved from '+prevMouseStatus.x+prevMouseStatus.y+
+                        //' to '+chessBoard.mouseStatus.x+chessBoard.mouseStatus.y);
+            chessBoard.mouseStatus = {mousedown: 0};
+            $('#mover').css({'left': '350px', 'top': '350px', 'background-color': 'green' });
+            $('#mover').empty();
           });
           document.addEventListener('mouseup', function (e) {
-            var xPos = e.clientX - parseInt(chessBoard.canvas.style.left);
-            var yPos = e.clientY - parseInt(chessBoard.canvas.style.top);
-            var coords = chessBoard.getSquareForCoordinates(xPos, yPos);
+            var coords = chessBoard.getCoords(e);
             var prevMouseStatus = chessBoard.mouseStatus;
             chessBoard.mouseStatus = { released: 'outside', x: coords[0], y: coords[1] };
-            console.log('moved from '+prevMouseStatus.x+prevMouseStatus.y+
-                        ' to OUTSIDE');
-            chessBoard.mouseStatus = {};
+            //console.log('moved from '+prevMouseStatus.x+prevMouseStatus.y+
+                        //' to OUTSIDE');
+            chessBoard.mouseStatus = {mousedown: 0};
+            $('#mover').css({'left': '350px', 'top': '350px' });
+            $('#mover').empty();
+          });
+          
+          document.addEventListener('mousemove', function (e) {
+            e.preventDefault();
+            if (chessBoard.mouseStatus.mousedown) {
+              e.stopPropagation();
+              $('#mover').css({
+                                'left': (e.clientX - 20) + 'px',
+                                'top': (e.clientY - 20) + 'px'
+                            });
+            }
           });
         },
         
@@ -138,9 +185,9 @@
         },
 
         drawLabels: function () {
-          console.log(this.canvas);
+          //console.log(this.canvas);
           this.context = this.canvas.getContext('2d');
-          console.log(this.context);
+          //console.log(this.context);
           this.context.scale(0.025, 0.025);
           this.context.fillStyle = 'black';
           this.context.font = '32px serif';
@@ -167,23 +214,26 @@
         },
         getSquareForCoordinates: function (left, top) {
           var xyArray = chessBoard.getRawSquareForCoordinates(left, top);
-          console.log(xyArray);
+          //console.log(xyArray);
           return [chessBoard.colLetterForIndex(xyArray[0]),
                   chessBoard.rowNumberForIndex(xyArray[1])];
         }
       };
       
       for (key in chessBoard.imgSrcs) {
-        console.log(key);
+        //console.log(key);
         let pic = new Image();
         pic.src = chessBoard.imgSrcs[key];
+        pic.style.width = '40px';
+        pic.style.height = '40px';
         chessBoard.imgObjs[key] = pic;
       }
-      console.log(chessBoard.imgObjs);
-      console.table(chessBoard.matrix);
+      //console.log(chessBoard.imgObjs);
+//      console.table(chessBoard.matrix);
     </script>
   </head>
   <body onload="chessBoard.init()">
     <canvas id="canvas" width="360" height="360" style="position:absolute; left:20px; top:20px;"></canvas>
+    <div id="mover"></div>
   </body>
 </html>
