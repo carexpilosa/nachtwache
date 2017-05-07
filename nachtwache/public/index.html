@@ -16,6 +16,7 @@
     </style>
     <script src="js/jquery-3.2.1.js" type="text/javascript"></script>
     <script type="text/javascript">
+      'use strict';
       var cB = {
         imgSrcs: {r: './img/bR.png',
                   n: './img/bN.png',
@@ -30,20 +31,20 @@
                   K: './img/wK.png',
                   P: './img/wP.png'},
 
-        imgObjs: {},
-        
-        mouseStatus: {},
-        
         FENPos: "rnbqkbnr/ppp1pppp/3p4/8/4P3/8/PPPP1PPP/RNBQKBNR",
         
         matrix: (function () { //TODO: Matrix to fen!
           //administration of position vi FEN String
           var m = [];
-          for(i = 0; i < 8; i++) {
+          for(var i = 0; i < 8; i++) {
             m[i] = ['','','','','','','',''];
           }
           return m;
         }()),
+        
+        imgObjs: {},
+        
+        mouseStatus: {},
         
         FENPosToMatrix: function () {
           var rows = this.FENPos.split('/');
@@ -119,7 +120,7 @@
           document.addEventListener('mouseup', function (e) {
             var [x, y] = cB.getXY(e);
             var img = cB.imgObjs[cB.mouseStatus.imgKey];
-            if(x > 0 && x < 8 && y > 0 && y < 8) {
+            if(x -1 && x < 8 && y > -1 && y < 8) {
               cB.rawDraw(x, y, 1, 1, cB.mouseStatus.imgKey);
             } else {
               cB.rawDraw(cB.mouseStatus.x, cB.mouseStatus.y, 1, 1, cB.mouseStatus.imgKey);
@@ -177,27 +178,33 @@
         },
 
         drawLabels: function () {
-          this.context = this.canvas.getContext('2d');
-          this.context.scale(0.025, 0.025);
-          this.context.fillStyle = 'black';
-          this.context.font = '32px serif';
-          this.context.fillText('a', 9, 345);
-          this.context.fillText('b', 49, 345);
-          this.context.fillText('c', 89, 345);
-          this.context.fillText('d', 129, 345);
-          this.context.fillText('e', 169, 345);
-          this.context.fillText('f', 209, 345);
-          this.context.fillText('g', 249, 345);
-          this.context.fillText('h', 289, 345);
-          this.context.fillText('1', 329, 32);
-          this.context.fillText('2', 329, 72);
-          this.context.fillText('3', 329, 112);
-          this.context.fillText('4', 329, 152);
-          this.context.fillText('5', 329, 192);
-          this.context.fillText('6', 329, 232);
-          this.context.fillText('7', 329, 272);
-          this.context.fillText('8', 329, 312);
-          this.context.scale(40, 40);
+          var ctx = this.context;
+          ctx.scale(0.025, 0.025);
+          ctx.fillStyle = 'black';
+          ctx.font = '32px serif';
+          'abcdefgh'.split('').forEach(function (val, idx) {
+            ctx.fillText(val, idx * 40 + 9, 345);
+          });
+          '12345678'.split('').forEach(function (val, idx) {
+            ctx.fillText(val, 329, idx * 40 + 32);
+          });
+          /*ctx.fillText('a', 9, 345);
+          ctx.fillText('b', 49, 345);
+          ctx.fillText('c', 89, 345);
+          ctx.fillText('d', 129, 345);
+          ctx.fillText('e', 169, 345);
+          ctx.fillText('f', 209, 345);
+          ctx.fillText('g', 249, 345);
+          ctx.fillText('h', 289, 345);
+          ctx.fillText('1', 329, 32);
+          ctx.fillText('2', 329, 72);
+          ctx.fillText('3', 329, 112);
+          ctx.fillText('4', 329, 152);
+          ctx.fillText('5', 329, 192);
+          ctx.fillText('6', 329, 232);
+          ctx.fillText('7', 329, 272);
+          ctx.fillText('8', 329, 312);*/
+          ctx.scale(40, 40);
         },
         getRawSquareForCoordinates: function (left, top) {
           return [Math.floor(left / 40), Math.floor(top / 40)];
@@ -209,7 +216,7 @@
         }
       };
       
-      for (key in cB.imgSrcs) {
+      for (var key in cB.imgSrcs) {
         let pic = new Image();
         pic.src = cB.imgSrcs[key];
         pic.style.width = '40px';
