@@ -1,4 +1,10 @@
+/*jshint esversion: 6 */
+/* jshint strict: true */
+/*globals $:false */
+/*globals document:false */
+/*globals console:false */
 'use strict';
+
 var cB = {
   imgSrcs: {r: './img/bR.png',
             n: './img/bN.png',
@@ -33,7 +39,7 @@ var cB = {
     rows.forEach(function (row, y) {
       var x = 0;
       var pieces = row.split('');
-      pieces.forEach(function (p, idx) {
+      pieces.forEach(function (p) {
         if (p.match(/\d/)) {
           var toX = x+parseInt(p);
           while(x < toX) {
@@ -51,9 +57,8 @@ var cB = {
 
   init: function () {
     this.board = document.querySelector('#board');
-    this.context = board.getContext('2d');
+    this.context = this.board.getContext('2d');
     this.context.scale(40, 40);
-    var k = 0;
     this.FENPosToMatrix();
     this.drawLabels();
     this.addEvents();
@@ -111,7 +116,6 @@ var cB = {
 
       e.stopPropagation();
 
-      var moveImg = cB.imgObjs[moveImgKey];
       $('#mover').append(moveImg);
 
       $('#mover').css({
@@ -123,7 +127,6 @@ var cB = {
     });
     document.addEventListener('mouseup', function (e) {
       var [x, y] = cB.getXY(e);
-      var img = cB.imgObjs[cB.mouseStatus.imgKey];
       if(x > -1 && x < 8 && y > -1 && y < 8) {
         cB.rawDraw(x, y, 1, 1, cB.mouseStatus.imgKey);
       } else {
@@ -147,9 +150,9 @@ var cB = {
   },
 
   draw: function(col, row, w, h, imgkey) {
-    context.fillRect(indexForColLetter(col), indexForRowNumber(row), 1, 1);
-    if(img) {
-      this.context.drawImage(img, col, row, w, h);
+    this.context.fillRect(this.indexForColLetter(col), this.indexForRowNumber(row), 1, 1);
+    if(imgkey) {
+      this.context.drawImage(this.imgObjs[imgkey], col, row, w, h);
     }
   },
 
