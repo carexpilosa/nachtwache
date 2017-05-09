@@ -9,7 +9,17 @@
 #board {
   position: absolute;
   left:     20px;
-  top:      60px;
+  top:      20px;
   width:    360px;
   height:   360px;
+}
+
+#content {
+  position: absolute;
+  left:     20px;
+  top:      380px;
+}
+
+#FENPos {
+  width: 500px;
 }
