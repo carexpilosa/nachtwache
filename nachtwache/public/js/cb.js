@@ -38,10 +38,10 @@ var cB = {
         if (p.match(/\d/)) {
           let toX = x+parseInt(p);
           while(x < toX) {
-            cB.rawDraw(x++, y, 1, 1);
+            cB.xyDraw(x++, y, 1, 1);
           }
         } else if (p.match(/[rnbqkpRNBQKP]/)) {
-          cB.rawDraw(x, y, 1, 1, p);
+          cB.xyDraw(x, y, 1, 1, p);
           x++;
         } else {
           x++;
@@ -61,36 +61,30 @@ var cB = {
   },
 
   move: (from, to) => { //e.g. 'd4', 'd5'
-    console.log(from,to);
-    let [fromCol, fromRow] = from.split('');
-    let [toCol, toRow] = to.split('');
-    console.log(fromCol, fromRow, toCol, toRow);
-    let fromX = cB.indexForColLetter(fromCol);
-    let fromY = cB.indexForRowNumber(fromRow);
-    let toX = cB.indexForColLetter(toCol);
-    let toY = cB.indexForRowNumber(toRow);
-    console.log(fromX,fromY,toX,toY);
-    console.table(cB.matrix);
-    let imgSrc = cB.matrix[fromY][fromX];
-    console.log(imgSrc);
-    cB.rawDraw(fromX, fromY, 1, 1);
+    let [fromCol, fromRow] = from.split(''),
+        [toCol, toRow] = to.split(''),
+        fromX = cB.indexForColLetter(fromCol),
+        fromY = cB.indexForRowNumber(fromRow),
+        toX = cB.indexForColLetter(toCol),
+        toY = cB.indexForRowNumber(toRow),
+        imgSrc = cB.matrix[fromY][fromX];
 
-    console.log(fromX, fromY, imgSrc);
+    cB.xyDraw(fromX, fromY, 1, 1);
     if (imgSrc) {
-      cB.rawDraw(toX, toY, 1, 1, imgSrc);
+      cB.xyDraw(toX, toY, 1, 1, imgSrc);
     }
   },
 
-  getCoords: (e) => {
-    let xPos = e.clientX - parseInt($('#board').css('left'));
-    let yPos = e.clientY - parseInt($('#board').css('top'));
-    return cB.getSquareForCoordinates(xPos, yPos);
+  getColRowForEvent: (e) => {
+    let xPos = e.clientX - parseInt($('#board').css('left')),
+        yPos = e.clientY - parseInt($('#board').css('top'));
+    return cB.getSquareForPx(xPos, yPos);
   },
 
-  getXY: (e) => {
-    let xPos = e.clientX - parseInt($('#board').css('left'));
-    let yPos = e.clientY - parseInt($('#board').css('top'));
-    return cB.getRawSquareForCoordinates(xPos, yPos);
+  getXYForEvent: (e) => {
+    let xPos = e.clientX - parseInt($('#board').css('left')),
+        yPos = e.clientY - parseInt($('#board').css('top'));
+    return cB.getXYSquareForPx(xPos, yPos);
   },
 
   getImgKeyForXY: (x, y) => {
@@ -98,10 +92,10 @@ var cB = {
   },
 
   addEvents: () => {
-    cB.board.addEventListener('mousedown', (e) => {
-      let [x, y] = cB.getXY(e);
-      let moveImgKey = cB.getImgKeyForXY(x, y);
-      let moveImg = cB.imgObjs[moveImgKey];
+    $('#board').on('mousedown', (e) => {
+      let [x, y] = cB.getXYForEvent(e),
+          moveImgKey = cB.getImgKeyForXY(x, y),
+          moveImg = cB.imgObjs[moveImgKey];
       cB.mouseStatus = {
                                  mousedown: 1,
                                  x: x,
@@ -118,21 +112,21 @@ var cB = {
                         'left': (e.clientX - 20) + 'px',
                         'top': (e.clientY - 20) + 'px'
                       });
-      cB.rawDraw(x, y, 1, 1);
+      cB.xyDraw(x, y, 1, 1);
     });
-    document.addEventListener('mouseup', (e) => {
-      let [x, y] = cB.getXY(e);
+    $(document).on('mouseup', (e) => {
+      let [x, y] = cB.getXYForEvent(e);
       if(x > -1 && x < 8 && y > -1 && y < 8) {
-        cB.rawDraw(x, y, 1, 1, cB.mouseStatus.imgKey);
+        cB.xyDraw(x, y, 1, 1, cB.mouseStatus.imgKey);
       } else {
-        cB.rawDraw(cB.mouseStatus.x, cB.mouseStatus.y, 1, 1, cB.mouseStatus.imgKey);
+        cB.xyDraw(cB.mouseStatus.x, cB.mouseStatus.y, 1, 1, cB.mouseStatus.imgKey);
       }
       $('#mover').css({'left': '350px', 'top': '350px' });
       $('#mover').empty();
       cB.mouseStatus = {mousedown: 0};
     });
 
-    document.addEventListener('mousemove', (e) => {
+    $(document).on('mousemove', (e) => {
       e.preventDefault();
       if (cB.mouseStatus.mousedown) {
         e.stopPropagation();
@@ -144,14 +138,14 @@ var cB = {
     });
   },
 
-  draw: (col, row, w, h, imgkey) => {
+  rowColDraw: (col, row, w, h, imgkey) => {
     cB.context.fillRect(cB.indexForColLetter(col), cB.indexForRowNumber(row), 1, 1);
     if(imgkey) {
       cB.context.drawImage(cB.imgObjs[imgkey], col, row, w, h);
     }
   },
 
-  rawDraw: (x, y, w, h, imgkey) => {
+  xyDraw: (x, y, w, h, imgkey) => {
     if(x > -1 && x < 8 && y > -1 && y < 8 ) {
       cB.context.fillStyle = (x + y) % 2 ? 'lightblue' : 'lightgray';
       cB.context.fillRect(x, y, w, h);
@@ -183,37 +177,56 @@ var cB = {
 
   drawLabels: () => {
     let ctx = cB.context;
-    ctx.scale(0.025, 0.025);
+    ctx.scale(1/40, 1/40);
     ctx.fillStyle = 'black';
     ctx.font = '32px serif';
-    'abcdefgh'.split('').forEach((val, idx) => {
+    
+    $.each('abcdefgh'.split(''), (idx, val) => {
       ctx.fillText(val, idx * 40 + 9, 345);
     });
-    '12345678'.split('').forEach((val, idx) => {
+    
+    $.each('12345678'.split(''), (idx, val) => {
       ctx.fillText(val, 329, idx * 40 + 32);
     });
+    
     ctx.scale(40, 40);
   },
-  getRawSquareForCoordinates: (left, top) => {
+  getXYSquareForPx: (left, top) => {
     return [Math.floor(left / 40), Math.floor(top / 40)];
   },
-  getSquareForCoordinates: (left, top) => {
-    let xyArray = cB.getRawSquareForCoordinates(left, top);
+  getSquareForPx: (left, top) => {
+    let xyArray = cB.getXYSquareForPx(left, top);
     return [cB.colLetterForIndex(xyArray[0]),
             cB.rowNumberForIndex(xyArray[1])];
   },
-  newFenPos: (pos) => {
+  
+  newFenPos: (posId) => {
+    let pos;
+    switch(posId) {
+      case 1:
+        pos = 'r1bqkb1r/1b1n1pp1/p2ppn1p/8/3NP2B/2N2Q2/PPP2PPP/2KR1B1R';
+        break;
+      case 2:
+        pos = 'r3r1k1/2q1bpp1/p1Ppbn1p/np2p3/P3P3/2P2N1P/1PBN1PP1/R1BQR1K1/2KR1B1R';
+        break;
+      default:
+        pos = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR';
+    }
+    cB.setFenPos(pos);
+  },
+  
+  setFenPos: (pos) => {
     cB.FENPos = pos;
     $('#FENPos').val(pos);
     cB.FENPosToMatrix();
-  }
+  },
+  
 
 };
 
 for (let key in cB.imgSrcs) {
   let pic = new Image();
-  pic.src = cB.imgSrcs[key];
-  pic.style.width = '40px';
-  pic.style.height = '40px';
+  $(pic).attr('src', cB.imgSrcs[key]).
+         css({width: '40px', height: '40px'});
   cB.imgObjs[key] = pic;
 }
