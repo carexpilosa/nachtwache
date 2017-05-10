@@ -1,19 +1,30 @@
 'use strict';
 
 var cB = {
-  imgSrcs: {r: './img/bR.png',
-            n: './img/bN.png',
-            b: './img/bB.png',
-            q: './img/bQ.png',
-            k: './img/bK.png',
-            p: './img/bP.png',
-            R: './img/wR.png',
-            N: './img/wN.png',
-            B: './img/wB.png',
-            Q: './img/wQ.png',
-            K: './img/wK.png',
-            P: './img/wP.png'},
-
+  SQUARE_SIZE: 40,
+  
+  spriteLoaded: false,
+  
+  initTimer: undefined,
+  
+  initCounter: 0,
+  
+  
+  spritePositions: {
+    b: 0,
+    k: 45,
+    n: 90,
+    p: 135,
+    q: 180,
+    r: 225,
+    B: 270,
+    K: 315,
+    N: 360,
+    P: 405,
+    Q: 450,
+    R: 495
+  },
+  
   FENPos: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR",
 
   matrix: (() => { //TODO: Matrix to fen!
@@ -24,8 +35,6 @@ var cB = {
     }
     return m;
   })(),
-
-  imgObjs: {},
 
   mouseStatus: {},
 
@@ -51,13 +60,24 @@ var cB = {
   },
 
   init: () => {
-    cB.board = document.querySelector('#board');
-    cB.context = cB.board.getContext('2d');
-    cB.context.scale(40, 40);
-    cB.FENPosToMatrix();
-    cB.drawLabels();
-    cB.addEvents();
-    $('#FENPos').val(cB.FENPos);
+    if (cB.spriteLoaded) {
+      cB.board = document.querySelector('#board');
+      cB.context = cB.board.getContext('2d');
+      cB.context.scale(cB.SQUARE_SIZE, cB.SQUARE_SIZE);
+      cB.FENPosToMatrix();
+      cB.drawLabels();
+      cB.addEvents();
+      $('#FENPos').val(cB.FENPos);
+    } else if (cB.initCounter++ > 40) {
+      clearTimeout(cB.initTimer);
+      $('#content').text('KANN SPRITE NICHT LADEN!');
+    } else {
+      cB.initTimer = setTimeout(cB.init, 100);
+    }
+    
+    $('#go').on('click', function () {
+      cB.setFenPos($('#FENPos').val());
+    });
   },
 
   move: (from, to) => { //e.g. 'd4', 'd5'
@@ -67,11 +87,11 @@ var cB = {
         fromY = cB.indexForRowNumber(fromRow),
         toX = cB.indexForColLetter(toCol),
         toY = cB.indexForRowNumber(toRow),
-        imgSrc = cB.matrix[fromY][fromX];
+        imgkey = cB.matrix[fromY][fromX];
 
     cB.xyDraw(fromX, fromY, 1, 1);
-    if (imgSrc) {
-      cB.xyDraw(toX, toY, 1, 1, imgSrc);
+    if (imgkey) {
+      cB.xyDraw(toX, toY, 1, 1, imgkey);
     }
   },
 
@@ -94,25 +114,31 @@ var cB = {
   addEvents: () => {
     $('#board').on('mousedown', (e) => {
       let [x, y] = cB.getXYForEvent(e),
-          moveImgKey = cB.getImgKeyForXY(x, y),
-          moveImg = cB.imgObjs[moveImgKey];
-      cB.mouseStatus = {
-                                 mousedown: 1,
-                                 x: x,
-                                 y: y,
-                                 imgKey: moveImgKey
-      };
+          moveImgKey = cB.getImgKeyForXY(x, y);
+      
+      if(moveImgKey) {
+        cB.mouseStatus = {
+                                   mousedown: 1,
+                                   x: x,
+                                   y: y,
+                                   imgKey: moveImgKey
+        };
 
-      e.stopPropagation();
+        e.stopPropagation();
 
-      $('#mover').append(moveImg);
+        $('#mover').css({
+          'visibility':          'visible',
+          'left':                (e.clientX - 20) + 'px',
+          'top':                 (e.clientY - 20) + 'px',
+          'width':               cB.SQUARE_SIZE + 'px',
+          'height':              cB.SQUARE_SIZE + 'px',
+          'background':          'url(./img/sprite.png)',
+          'background-position': '0 -'+ cB.spritePositions[moveImgKey]  + 'px',
+          'overflow':            'hidden'
+        });
 
-      $('#mover').css({
-                        'visibility': 'visible',
-                        'left': (e.clientX - 20) + 'px',
-                        'top': (e.clientY - 20) + 'px'
-                      });
-      cB.xyDraw(x, y, 1, 1);
+        cB.xyDraw(x, y, 1, 1);
+      }
     });
     $(document).on('mouseup', (e) => {
       let [x, y] = cB.getXYForEvent(e);
@@ -121,8 +147,12 @@ var cB = {
       } else {
         cB.xyDraw(cB.mouseStatus.x, cB.mouseStatus.y, 1, 1, cB.mouseStatus.imgKey);
       }
-      $('#mover').css({'left': '350px', 'top': '350px' });
-      $('#mover').empty();
+      $('#mover').
+        css({
+          'left': '350px',
+          'top': '350px',
+          'visibility': 'hidden'}).
+        empty();
       cB.mouseStatus = {mousedown: 0};
     });
 
@@ -130,18 +160,18 @@ var cB = {
       e.preventDefault();
       if (cB.mouseStatus.mousedown) {
         e.stopPropagation();
-        $('#mover').css({
-                          'left': (e.clientX - 20) + 'px',
-                          'top': (e.clientY - 20) + 'px'
-                      });
+        $('#mover').css({'left': (e.clientX - cB.SQUARE_SIZE/2) + 'px',
+                         'top': (e.clientY - cB.SQUARE_SIZE/2) + 'px'});
       }
     });
   },
 
   rowColDraw: (col, row, w, h, imgkey) => {
-    cB.context.fillRect(cB.indexForColLetter(col), cB.indexForRowNumber(row), 1, 1);
+    let [x, y] = [cB.indexForColLetter(col), cB.indexForRowNumber(row)];
+    cB.context.fillRect(x, y, 1, 1);
     if(imgkey) {
-      cB.context.drawImage(cB.imgObjs[imgkey], col, row, w, h);
+      cB.context.drawImage(cB.sprite, 0, cB.spritePositions[imgkey],
+                           cB.SQUARE_SIZE, cB.SQUARE_SIZE, x, y, w, h);
     }
   },
 
@@ -150,8 +180,8 @@ var cB = {
       cB.context.fillStyle = (x + y) % 2 ? 'lightblue' : 'lightgray';
       cB.context.fillRect(x, y, w, h);
       if(imgkey) {
-        let img = cB.imgObjs[imgkey];
-        cB.context.drawImage(img, x, y, w, h);
+        cB.context.drawImage(cB.sprite, 0, cB.spritePositions[imgkey], 
+                             cB.SQUARE_SIZE, cB.SQUARE_SIZE, x, y, w, h);
         cB.matrix[y][x] = imgkey;
       } else {
         cB.matrix[y][x] = '';
@@ -177,22 +207,23 @@ var cB = {
 
   drawLabels: () => {
     let ctx = cB.context;
-    ctx.scale(1/40, 1/40);
+    
+    ctx.scale(1/cB.SQUARE_SIZE, 1/cB.SQUARE_SIZE);
     ctx.fillStyle = 'black';
-    ctx.font = '32px serif';
+    ctx.font = '24px serif';
     
     $.each('abcdefgh'.split(''), (idx, val) => {
-      ctx.fillText(val, idx * 40 + 9, 345);
+      ctx.fillText(val, idx * cB.SQUARE_SIZE + 11, 345);
     });
     
     $.each('12345678'.split(''), (idx, val) => {
-      ctx.fillText(val, 329, idx * 40 + 32);
+      ctx.fillText(val, 329, idx * cB.SQUARE_SIZE + 32);
     });
     
-    ctx.scale(40, 40);
+    ctx.scale(cB.SQUARE_SIZE, cB.SQUARE_SIZE);
   },
   getXYSquareForPx: (left, top) => {
-    return [Math.floor(left / 40), Math.floor(top / 40)];
+    return [Math.floor(left / cB.SQUARE_SIZE), Math.floor(top / cB.SQUARE_SIZE)];
   },
   getSquareForPx: (left, top) => {
     let xyArray = cB.getXYSquareForPx(left, top);
@@ -209,6 +240,9 @@ var cB = {
       case 2:
         pos = 'r3r1k1/2q1bpp1/p1Ppbn1p/np2p3/P3P3/2P2N1P/1PBN1PP1/R1BQR1K1/2KR1B1R';
         break;
+      case 3:
+        pos = 'rnq2rk1/1pn12bp/p2p2p1/2pPp1PP/P1P1Pp2/2N2N2/1P1B1P2/R2QK2R';
+        break;
       default:
         pos = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR';
     }
@@ -219,14 +253,21 @@ var cB = {
     cB.FENPos = pos;
     $('#FENPos').val(pos);
     cB.FENPosToMatrix();
-  },
+  }
   
 
 };
 
-for (let key in cB.imgSrcs) {
-  let pic = new Image();
-  $(pic).attr('src', cB.imgSrcs[key]).
-         css({width: '40px', height: '40px'});
-  cB.imgObjs[key] = pic;
-}
+var sprite = new Image();
+$(sprite).attr('src', './img/sprite.png').
+  css({ 
+    width:  cB.SQUARE_SIZE + 'px',
+    height: (cB.SQUARE_SIZE * 12) + '480px' });
+$(sprite).on('load', () => {
+  cB.spriteLoaded = true;
+});
+cB.sprite = sprite;
+
+$(document).ready(function  () {
+  cB.init();
+});

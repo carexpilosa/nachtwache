@@ -2,8 +2,12 @@
     "globals": {
         "$": false,
         "document": false,
-        "console": false
+        "console": false,
+        "setTimeout": false,
+        "clearTimeout": false,
+        "Image": false
     },
     "esversion": 6,
-    "strict": true
+    "strict": true,
+    "globalstrict": true
 }
