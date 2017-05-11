@@ -11,6 +11,7 @@ module.exports = {
       .pause(1000)
       .assert.value('input[name=testInput]', 'nightwatch')
       .assert.containsText('h3#a', 'Sorbische Ostereier')
+      .waitForElementVisible('a', 1000)
       .end();
   }
 };
